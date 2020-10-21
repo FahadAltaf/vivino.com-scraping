@@ -989,7 +989,7 @@ namespace WineScraper.Models
     public class ExploreVintage
     {
         public Market market { get; set; }
-        public string records_matched { get; set; }
+        public int records_matched { get; set; }
         public List<Match> matches { get; set; }
         public List<object> bottle_type_errors { get; set; }
         public List<Record> records { get; set; }

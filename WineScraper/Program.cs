@@ -14,6 +14,17 @@ using WineScraper.Models;
 
 namespace WineScraper
 {
+    public class FilterModel
+    {
+        public string country_code { get; set; } = "US";
+        public string currency_code { get; set; } = "USD";
+        public string grape_filter { get; set; } = "varietal";
+        public int min_rating { get; set; } = 1;
+        public int page { get; set; } = 1;
+        public int price_range_max { get; set; } = 500;
+        public int price_range_min { get; set; } = 0;
+        public List<int> wine_type_ids { get; set; } = new List<int>() { 1 };
+    }
     public class DataModel
     {
         public string vintage_id { get; set; }
@@ -118,7 +129,8 @@ namespace WineScraper
             Console.ReadKey();
         }
 
-        public void ExtractData() {
+        public void ExtractData()
+        {
             foreach (var file in Directory.GetFiles(@"C:\Users\kernal\source\repos\WineScraper\WineScraper\bin\Debug\Data", "*.json"))
             {
                 var queryResult = JsonConvert.DeserializeObject<Root>(File.ReadAllText(file));
@@ -439,16 +451,50 @@ namespace WineScraper
                 }
                 else
                     Console.WriteLine("No Results");
-                
+
             }
         }
         public static void GetJsonFiles()
         {
-            List<int> wineIds = new List<int> {1,2,3,4,7,24 };
+            //Possible wine Ids
+            List<int> wineIds = new List<int> { 1, 2, 3, 4, 7, 24 };
+
+
             foreach (var wineId in wineIds)
             {
-                for (int i = 1; i <= 5; i++)
+                //Possible rating filter
+                for (int rating = 1; rating <= 5; rating++)
                 {
+                    int minPrice = 0; int maxPrice = 0;
+                    //max and min price filter
+                    for (int p = 10; p <= 500; p += 2)
+                    {
+                        maxPrice = p;
+                        var content = RequestData(new FilterModel { price_range_min = minPrice, price_range_max = maxPrice, min_rating = rating, wine_type_ids = new List<int> { wineId } });
+                        if (!string.IsNullOrEmpty(content))
+                        {
+                            //got result let parse it and check how many total records are there
+
+                            var data = JsonConvert.DeserializeObject<Root>(content);
+                            if (data.explore_vintage.records_matched < 2025)
+                            {
+                                Console.WriteLine($"Check min:{minPrice}, max:{maxPrice} " + data.explore_vintage.records_matched);
+                                continue;
+                            }
+                            else
+                            {
+                             
+                                content = RequestData(new FilterModel { price_range_min = minPrice, price_range_max = maxPrice-2, min_rating = rating, wine_type_ids = new List<int> { wineId } });
+                                minPrice = maxPrice-2;
+                                if (!string.IsNullOrEmpty(content))
+                                {
+                                    data = JsonConvert.DeserializeObject<Root>(content);
+                                    Console.WriteLine("Event Reached " + data.explore_vintage.records_matched);
+                                }
+
+                            }
+                        }
+                    }
 
                 }
             }
@@ -479,27 +525,30 @@ namespace WineScraper
 
         private static void GetPagesData(List<int> pages)
         {
-            var client = new RestClient("https://www.vivino.com/");
-            client.Proxy = new WebProxy("127.0.0.1", 2400);
+
             foreach (var page in pages)
             {
-                var request = new RestRequest($"api/explore/explore?country_code=US&currency_code=USD&grape_filter=varietal&min_rating=1&order_by=ratings_average&order=desc&page={page}&price_range_max=500&price_range_min=0&vc_only=null&wine_type_ids[]=1&wine_type_ids[]=2&wine_type_ids[]=3&wine_type_ids[]=4&wine_type_ids[]=7&wine_type_ids[]=24", Method.GET);
-                var queryResult = client.Execute(request);
-                if (queryResult.StatusCode == System.Net.HttpStatusCode.OK)
-                {
-                    File.WriteAllText($"Data/Page{page}.json", queryResult.Content);
-                    Console.Clear();
-                    Console.WriteLine($"Page{page}");
-
-
-                }
-                else
-                {
-                    Console.Clear();
-                    Console.WriteLine($"Unable to load Page {page}");
-                    File.AppendAllText("failed.txt", page + Environment.NewLine);
-                }
+                RequestData(new FilterModel { });
             }
+        }
+
+        private static string RequestData(FilterModel model)
+        {
+            string content = string.Empty;
+
+            var client = new RestClient("https://www.vivino.com/");
+            //client.Proxy = new WebProxy("127.0.0.1", 2400);
+            string url = $"api/explore/explore?country_code={model.country_code}&currency_code={model.currency_code}&grape_filter=varietal&min_rating={model.min_rating}&order_by=ratings_average&order=desc&page={model.page}&price_range_max={model.price_range_max}&price_range_min={model.price_range_min}&vc_only=null";
+            foreach (var wine in model.wine_type_ids)
+            {
+                url += $"&wine_type_ids[]={wine}";
+            }
+            var request = new RestRequest(url, Method.GET);
+            var queryResult = client.Execute(request);
+            content = (queryResult.StatusCode == System.Net.HttpStatusCode.OK) ? queryResult.Content : "";
+            if (string.IsNullOrEmpty(content))
+                Console.WriteLine($"Error: Unable to load {url}");
+            return content;
         }
     }
 }
