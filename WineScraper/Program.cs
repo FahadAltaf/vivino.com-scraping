@@ -129,170 +129,196 @@ namespace WineScraper
             Console.ReadKey();
         }
 
-        public void ExtractData()
+        public static void ExtractData(string content)
         {
-            foreach (var file in Directory.GetFiles(@"C:\Users\kernal\source\repos\WineScraper\WineScraper\bin\Debug\Data", "*.json"))
+            var queryResult = JsonConvert.DeserializeObject<Root>(content);
+            var data = queryResult.explore_vintage.matches;
+
+            foreach (var record in data)
             {
-                var queryResult = JsonConvert.DeserializeObject<Root>(File.ReadAllText(file));
-                var data = queryResult.explore_vintage.matches;
-
-                foreach (var record in data)
+                var entry = new DataModel();
+                if (record.vintage != null)
                 {
-                    var entry = new DataModel();
-                    if (record.vintage != null)
+                    entry.vintage_id = record.vintage.id;
+                    entry.vintage_seo_name = record.vintage.seo_name;
+                    entry.vintage_name = record.vintage.name;
+
+                    entry.vintage_year = record.vintage.year;
+
+                    entry.vintage_has_valid_ratings = record.vintage.has_valid_ratings;
+
+                    if (record.vintage.grapes != null)
                     {
-                        entry.vintage_id = record.vintage.id;
-                        entry.vintage_seo_name = record.vintage.seo_name;
-                        entry.vintage_name = record.vintage.name;
+                        entry.vintage_grapes = record.vintage.grapes;
+                    }
 
-                        entry.vintage_year = record.vintage.year;
+                    if (record.vintage.statistics != null)
+                    {
+                        entry.vintage_statistics_status = record.vintage.statistics.status;
+                        entry.vintage_statistics_ratings_count = record.vintage.statistics.ratings_count;
+                        entry.vintage_statistics_ratings_average = record.vintage.statistics.ratings_average;
+                        entry.vintage_statistics_labels_count = record.vintage.statistics.labels_count;
+                    }
 
-                        entry.vintage_has_valid_ratings = record.vintage.has_valid_ratings;
-
-                        if (record.vintage.grapes != null)
+                    if (record.vintage.image != null)
+                    {
+                        entry.vintage_image_location = record.vintage.image.location;
+                        if (record.vintage.image.variations != null)
                         {
-                            entry.vintage_grapes = record.vintage.grapes;
+                            entry.vintage_image_variations_bottle_large = record.vintage.image.variations.bottle_large;
+                            entry.vintage_image_variations_label_large = record.vintage.image.variations.label_large;
                         }
+                    }
 
-                        if (record.vintage.statistics != null)
+                    if (record.vintage.wine != null)
+                    {
+                        entry.vintage_wine_id = record.vintage.wine.id;
+                        entry.vintage_wine_name = record.vintage.wine.name;
+                        entry.vintage_wine_seo_name = record.vintage.wine.seo_name;
+                        entry.vintage_wine_has_valid_ratings = record.vintage.has_valid_ratings;
+
+                        if (record.vintage.wine.region != null)
                         {
-                            entry.vintage_statistics_status = record.vintage.statistics.status;
-                            entry.vintage_statistics_ratings_count = record.vintage.statistics.ratings_count;
-                            entry.vintage_statistics_ratings_average = record.vintage.statistics.ratings_average;
-                            entry.vintage_statistics_labels_count = record.vintage.statistics.labels_count;
-                        }
-
-                        if (record.vintage.image != null)
-                        {
-                            entry.vintage_image_location = record.vintage.image.location;
-                            if (record.vintage.image.variations != null)
+                            entry.vintage_wine_region_id = record.vintage.wine.region.id;
+                            entry.vintage_wine_region_name = record.vintage.wine.region.name;
+                            entry.vintage_wine_region_seo_name = record.vintage.wine.region.seo_name;
+                            if (record.vintage.wine.region.country != null)
                             {
-                                entry.vintage_image_variations_bottle_large = record.vintage.image.variations.bottle_large;
-                                entry.vintage_image_variations_label_large = record.vintage.image.variations.label_large;
-                            }
-                        }
+                                entry.vintage_wine_region_country_name = record.vintage.wine.region.country.name;
+                                entry.vintage_wine_region_country_seo_name = record.vintage.wine.region.country.seo_name;
+                                entry.vintage_wine_region_country_regions_count = record.vintage.wine.region.country.regions_count;
+                                entry.vintage_wine_region_country_users_count = record.vintage.wine.region.country.users_count;
+                                entry.vintage_wine_region_country_wineries_count = record.vintage.wine.region.country.wineries_count;
 
-                        if (record.vintage.wine != null)
-                        {
-                            entry.vintage_wine_id = record.vintage.wine.id;
-                            entry.vintage_wine_name = record.vintage.wine.name;
-                            entry.vintage_wine_seo_name = record.vintage.wine.seo_name;
-                            entry.vintage_wine_has_valid_ratings = record.vintage.has_valid_ratings;
-
-                            if (record.vintage.wine.region != null)
-                            {
-                                entry.vintage_wine_region_id = record.vintage.wine.region.id;
-                                entry.vintage_wine_region_name = record.vintage.wine.region.name;
-                                entry.vintage_wine_region_seo_name = record.vintage.wine.region.seo_name;
-                                if (record.vintage.wine.region.country != null)
-                                {
-                                    entry.vintage_wine_region_country_name = record.vintage.wine.region.country.name;
-                                    entry.vintage_wine_region_country_seo_name = record.vintage.wine.region.country.seo_name;
-                                    entry.vintage_wine_region_country_regions_count = record.vintage.wine.region.country.regions_count;
-                                    entry.vintage_wine_region_country_users_count = record.vintage.wine.region.country.users_count;
-                                    entry.vintage_wine_region_country_wineries_count = record.vintage.wine.region.country.wineries_count;
-
-                                    if (record.vintage.wine.region.country.most_used_grapes != null && record.vintage.wine.region.country.most_used_grapes.Count > 0)
-                                        foreach (var item in record.vintage.wine.region.country.most_used_grapes)
-                                        {
-                                            vintage_wine_region_country_most_used_grapes.Add(new Vintage_Wine_Region_Country_MostUsedGrape
-                                            {
-                                                vintage_id = record.vintage.id,
-                                                wine_id = record.vintage.wine.id,
-                                                region_id = record.vintage.wine.region.id,
-                                                id = item.id,
-                                                name = item.name,
-                                                seo_name = item.seo_name,
-                                                wines_count = item.wines_count,
-                                                has_detailed_info = item.has_detailed_info
-                                            });
-                                        }
-
-                                }
-
-                            }
-
-                            if (record.vintage.wine.taste != null && record.vintage.wine.taste.structure != null)
-                            {
-                                entry.vintage_wine_taste_structure_acidity = record.vintage.wine.taste.structure.acidity;
-                                entry.vintage_wine_taste_structure_fizziness = record.vintage.wine.taste.structure.fizziness;
-                                entry.vintage_wine_taste_structure_intensity = record.vintage.wine.taste.structure.intensity;
-                                entry.vintage_wine_taste_structure_sweetness = record.vintage.wine.taste.structure.sweetness;
-                                entry.vintage_wine_taste_structure_tannin = record.vintage.wine.taste.structure.tannin;
-                                entry.vintage_wine_taste_structure_user_structure_count = record.vintage.wine.taste.structure.user_structure_count;
-                                entry.vintage_wine_taste_structure_calculated_structure_count = record.vintage.wine.taste.structure.calculated_structure_count;
-                                if (record.vintage.wine.taste.flavor != null && record.vintage.wine.taste.flavor.Count > 0)
-                                {
-                                    foreach (var item in record.vintage.wine.taste.flavor)
+                                if (record.vintage.wine.region.country.most_used_grapes != null && record.vintage.wine.region.country.most_used_grapes.Count > 0)
+                                    foreach (var item in record.vintage.wine.region.country.most_used_grapes)
                                     {
-                                        var xx = new Vintage_Wine_Taste_Flavor
-                                        {
-                                            vintage_id = record.vintage.id,
-                                            vintage_wine_id = record.vintage.wine.id,
-                                            group = item.group,
-
-                                        };
-                                        if (item.stats != null)
-                                        {
-                                            xx.stats_count = item.stats.count;
-                                            xx.stats_score = item.stats.score;
-                                        }
-                                        vintage_wine_taste_flavor.Add(xx);
-                                    }
-
-                                }
-
-                            }
-
-                            if (record.vintage.wine.statistics != null)
-                            {
-                                entry.vintage_wine_statistics_status = record.vintage.wine.statistics.status;
-                                entry.vintage_wine_statistics_ratings_count = record.vintage.wine.statistics.ratings_count;
-                                entry.vintage_wine_statistics_ratings_average = record.vintage.wine.statistics.ratings_average;
-                                entry.vintage_wine_statistics_labels_count = record.vintage.wine.statistics.labels_count;
-                                entry.vintage_wine_statistics_vintages_count = record.vintage.wine.statistics.vintages_count;
-                            }
-
-
-                            if (record.vintage.wine.style != null)
-                            {
-                                entry.vintage_wine_style_id = record.vintage.wine.style.id;
-                                entry.vintage_wine_style_seo_name = record.vintage.wine.style.seo_name;
-                                entry.vintage_wine_style_regional_name = record.vintage.wine.style.regional_name;
-                                entry.vintage_wine_style_varietal_name = record.vintage.wine.style.varietal_name;
-                                entry.vintage_wine_style_description = record.vintage.wine.style.description;
-                                entry.vintage_wine_style_blurb = record.vintage.wine.style.blurb;
-                                if (record.vintage.wine.style.interesting_facts != null && record.vintage.wine.style.interesting_facts.Count > 0)
-                                {
-                                    entry.vintage_wine_styleinteresting_facts = string.Join(";", record.vintage.wine.style.interesting_facts);
-                                }
-
-                                entry.vintage_wine_style_body = record.vintage.wine.style.body;
-                                entry.vintage_wine_style_body_description = record.vintage.wine.style.description;
-                                entry.vintage_wine_style_acidity = record.vintage.wine.style.acidity;
-                                entry.vintage_wine_style_acidity_description = record.vintage.wine.style.description;
-
-                                if (record.vintage.wine.style.food != null && record.vintage.wine.style.food.Count > 0)
-                                {
-                                    foreach (var item in record.vintage.wine.style.food)
-                                    {
-                                        vintage_wine_style_food.Add(new Vintage_Wine_Style_Food
+                                        vintage_wine_region_country_most_used_grapes.Add(new Vintage_Wine_Region_Country_MostUsedGrape
                                         {
                                             vintage_id = record.vintage.id,
                                             wine_id = record.vintage.wine.id,
-                                            style_id = record.vintage.wine.style.id,
+                                            region_id = record.vintage.wine.region.id,
                                             id = item.id,
                                             name = item.name,
-                                            seo_name = item.seo_name
+                                            seo_name = item.seo_name,
+                                            wines_count = item.wines_count,
+                                            has_detailed_info = item.has_detailed_info
                                         });
                                     }
+
+                            }
+
+                        }
+
+                        if (record.vintage.wine.taste != null && record.vintage.wine.taste.structure != null)
+                        {
+                            entry.vintage_wine_taste_structure_acidity = record.vintage.wine.taste.structure.acidity;
+                            entry.vintage_wine_taste_structure_fizziness = record.vintage.wine.taste.structure.fizziness;
+                            entry.vintage_wine_taste_structure_intensity = record.vintage.wine.taste.structure.intensity;
+                            entry.vintage_wine_taste_structure_sweetness = record.vintage.wine.taste.structure.sweetness;
+                            entry.vintage_wine_taste_structure_tannin = record.vintage.wine.taste.structure.tannin;
+                            entry.vintage_wine_taste_structure_user_structure_count = record.vintage.wine.taste.structure.user_structure_count;
+                            entry.vintage_wine_taste_structure_calculated_structure_count = record.vintage.wine.taste.structure.calculated_structure_count;
+                            if (record.vintage.wine.taste.flavor != null && record.vintage.wine.taste.flavor.Count > 0)
+                            {
+                                foreach (var item in record.vintage.wine.taste.flavor)
+                                {
+                                    var xx = new Vintage_Wine_Taste_Flavor
+                                    {
+                                        vintage_id = record.vintage.id,
+                                        vintage_wine_id = record.vintage.wine.id,
+                                        group = item.group,
+
+                                    };
+                                    if (item.stats != null)
+                                    {
+                                        xx.stats_count = item.stats.count;
+                                        xx.stats_score = item.stats.score;
+                                    }
+                                    vintage_wine_taste_flavor.Add(xx);
                                 }
 
-                                if (record.vintage.wine.style.grapes != null && record.vintage.wine.style.grapes.Count > 0)
+                            }
+
+                        }
+
+                        if (record.vintage.wine.statistics != null)
+                        {
+                            entry.vintage_wine_statistics_status = record.vintage.wine.statistics.status;
+                            entry.vintage_wine_statistics_ratings_count = record.vintage.wine.statistics.ratings_count;
+                            entry.vintage_wine_statistics_ratings_average = record.vintage.wine.statistics.ratings_average;
+                            entry.vintage_wine_statistics_labels_count = record.vintage.wine.statistics.labels_count;
+                            entry.vintage_wine_statistics_vintages_count = record.vintage.wine.statistics.vintages_count;
+                        }
+
+
+                        if (record.vintage.wine.style != null)
+                        {
+                            entry.vintage_wine_style_id = record.vintage.wine.style.id;
+                            entry.vintage_wine_style_seo_name = record.vintage.wine.style.seo_name;
+                            entry.vintage_wine_style_regional_name = record.vintage.wine.style.regional_name;
+                            entry.vintage_wine_style_varietal_name = record.vintage.wine.style.varietal_name;
+                            entry.vintage_wine_style_description = record.vintage.wine.style.description;
+                            entry.vintage_wine_style_blurb = record.vintage.wine.style.blurb;
+                            if (record.vintage.wine.style.interesting_facts != null && record.vintage.wine.style.interesting_facts.Count > 0)
+                            {
+                                entry.vintage_wine_styleinteresting_facts = string.Join(";", record.vintage.wine.style.interesting_facts);
+                            }
+
+                            entry.vintage_wine_style_body = record.vintage.wine.style.body;
+                            entry.vintage_wine_style_body_description = record.vintage.wine.style.description;
+                            entry.vintage_wine_style_acidity = record.vintage.wine.style.acidity;
+                            entry.vintage_wine_style_acidity_description = record.vintage.wine.style.description;
+
+                            if (record.vintage.wine.style.food != null && record.vintage.wine.style.food.Count > 0)
+                            {
+                                foreach (var item in record.vintage.wine.style.food)
                                 {
-                                    foreach (var item in record.vintage.wine.style.grapes)
+                                    vintage_wine_style_food.Add(new Vintage_Wine_Style_Food
                                     {
-                                        vintage_wine_style_grapes.Add(new Vintage_Wine_Style_Grapes
+                                        vintage_id = record.vintage.id,
+                                        wine_id = record.vintage.wine.id,
+                                        style_id = record.vintage.wine.style.id,
+                                        id = item.id,
+                                        name = item.name,
+                                        seo_name = item.seo_name
+                                    });
+                                }
+                            }
+
+                            if (record.vintage.wine.style.grapes != null && record.vintage.wine.style.grapes.Count > 0)
+                            {
+                                foreach (var item in record.vintage.wine.style.grapes)
+                                {
+                                    vintage_wine_style_grapes.Add(new Vintage_Wine_Style_Grapes
+                                    {
+                                        vintage_id = record.vintage.id,
+                                        wine_id = record.vintage.wine.id,
+                                        style_id = record.vintage.wine.style.id,
+                                        id = item.id,
+                                        name = item.name,
+                                        seo_name = item.seo_name,
+                                        has_detailed_info = item.has_detailed_info,
+                                        wines_count = item.wines_count
+                                    });
+                                }
+
+                            }
+
+                            if (record.vintage.wine.style.country != null)
+                            {
+                                entry.vintage_wine_style_country_name = record.vintage.wine.style.country.name;
+                                entry.vintage_wine_style_country_seo_name = record.vintage.wine.style.country.seo_name;
+                                entry.vintage_wine_style_country_regions_count = record.vintage.wine.style.country.regions_count;
+                                entry.vintage_wine_style_country_users_count = record.vintage.wine.style.country.users_count;
+                                entry.vintage_wine_style_country_wines_count = record.vintage.wine.style.country.wines_count;
+                                entry.vintage_wine_style_country_wineries_count = record.vintage.wine.style.country.wineries_count;
+
+                                if (record.vintage.wine.style.country.most_used_grapes != null && record.vintage.wine.style.country.most_used_grapes.Count > 0)
+                                {
+                                    foreach (var item in record.vintage.wine.style.country.most_used_grapes)
+                                    {
+                                        vintage_wine_style_country_most_used_grapes.Add(new Vintage_Wine_Style_Country_MostUsedGrape
                                         {
                                             vintage_id = record.vintage.id,
                                             wine_id = record.vintage.wine.id,
@@ -300,89 +326,62 @@ namespace WineScraper
                                             id = item.id,
                                             name = item.name,
                                             seo_name = item.seo_name,
-                                            has_detailed_info = item.has_detailed_info,
-                                            wines_count = item.wines_count
+                                            wines_count = item.wines_count,
+                                            has_detailed_info = item.has_detailed_info
                                         });
                                     }
-
-                                }
-
-                                if (record.vintage.wine.style.country != null)
-                                {
-                                    entry.vintage_wine_style_country_name = record.vintage.wine.style.country.name;
-                                    entry.vintage_wine_style_country_seo_name = record.vintage.wine.style.country.seo_name;
-                                    entry.vintage_wine_style_country_regions_count = record.vintage.wine.style.country.regions_count;
-                                    entry.vintage_wine_style_country_users_count = record.vintage.wine.style.country.users_count;
-                                    entry.vintage_wine_style_country_wines_count = record.vintage.wine.style.country.wines_count;
-                                    entry.vintage_wine_style_country_wineries_count = record.vintage.wine.style.country.wineries_count;
-
-                                    if (record.vintage.wine.style.country.most_used_grapes != null && record.vintage.wine.style.country.most_used_grapes.Count > 0)
-                                    {
-                                        foreach (var item in record.vintage.wine.style.country.most_used_grapes)
-                                        {
-                                            vintage_wine_style_country_most_used_grapes.Add(new Vintage_Wine_Style_Country_MostUsedGrape
-                                            {
-                                                vintage_id = record.vintage.id,
-                                                wine_id = record.vintage.wine.id,
-                                                style_id = record.vintage.wine.style.id,
-                                                id = item.id,
-                                                name = item.name,
-                                                seo_name = item.seo_name,
-                                                wines_count = item.wines_count,
-                                                has_detailed_info = item.has_detailed_info
-                                            });
-                                        }
-                                    }
                                 }
                             }
-                        }
-
-                        if (record.vintage.top_list_rankings.Count > 0)
-                        {
-                            foreach (var item in record.vintage.top_list_rankings)
-                            {
-                                vintage_top_list_rankings.Add(new Vintage_TopListRanking
-                                {
-                                    vintage_id = record.vintage.id,
-                                    vintage_topListRanking_top_list_id = item.top_list.id,
-                                    vintage_topListRanking_top_list_name = item.top_list.name,
-                                    vintage_topListRanking_description = item.description,
-                                    vintage_topListRanking_previous_rank = item.previous_rank,
-                                    vintage_topListRanking_rank = item.rank,
-                                    vintage_topListRanking_top_list_location = item.top_list.location,
-                                    vintage_topListRanking_top_list_seo_name = item.top_list.seo_name,
-                                    vintage_topListRanking_top_list_type = item.top_list.type,
-                                    vintage_topListRanking_top_list_year = item.top_list.year
-                                });
-                            }
-                            //Loop
-
                         }
                     }
 
-                    if (record.price != null)
+                    if (record.vintage.top_list_rankings.Count > 0)
                     {
-                        entry.price_id = record.price.id;
-                        entry.price_amount = record.price.amount;
-                        entry.price_discounted_from = record.price.discounted_from;
-                        entry.price_sku = record.price.sku;
-                        entry.price_url = record.price.url;
-                        if (record.price.currency != null)
-                            entry.price_currency_code = record.price.currency.code;
-
-                        if (record.price.bottle_type != null)
+                        foreach (var item in record.vintage.top_list_rankings)
                         {
-                            entry.price_bottle_type_id = record.price.bottle_type.id;
-                            entry.price_bottle_type_name = record.price.bottle_type.name;
-                            entry.price_bottle_type_volume_ml = record.price.bottle_type.volume_ml;
+                            vintage_top_list_rankings.Add(new Vintage_TopListRanking
+                            {
+                                vintage_id = record.vintage.id,
+                                vintage_topListRanking_top_list_id = item.top_list.id,
+                                vintage_topListRanking_top_list_name = item.top_list.name,
+                                vintage_topListRanking_description = item.description,
+                                vintage_topListRanking_previous_rank = item.previous_rank,
+                                vintage_topListRanking_rank = item.rank,
+                                vintage_topListRanking_top_list_location = item.top_list.location,
+                                vintage_topListRanking_top_list_seo_name = item.top_list.seo_name,
+                                vintage_topListRanking_top_list_type = item.top_list.type,
+                                vintage_topListRanking_top_list_year = item.top_list.year
+                            });
                         }
+                        //Loop
+
                     }
-
-                    entries.Add(entry);
                 }
-                Console.WriteLine(file);
-            }
 
+                if (record.price != null)
+                {
+                    entry.price_id = record.price.id;
+                    entry.price_amount = record.price.amount;
+                    entry.price_discounted_from = record.price.discounted_from;
+                    entry.price_sku = record.price.sku;
+                    entry.price_url = record.price.url;
+                    if (record.price.currency != null)
+                        entry.price_currency_code = record.price.currency.code;
+
+                    if (record.price.bottle_type != null)
+                    {
+                        entry.price_bottle_type_id = record.price.bottle_type.id;
+                        entry.price_bottle_type_name = record.price.bottle_type.name;
+                        entry.price_bottle_type_volume_ml = record.price.bottle_type.volume_ml;
+                    }
+                }
+
+                entries.Add(entry);
+            }
+        }
+
+        public static void ExportData()
+        {
             using (var writer = new StreamWriter("vintage_wine_style_grapes.csv", false, Encoding.UTF8))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
@@ -483,52 +482,94 @@ namespace WineScraper
                             }
                             else
                             {
-                             
-                                content = RequestData(new FilterModel { price_range_min = minPrice, price_range_max = maxPrice-2, min_rating = rating, wine_type_ids = new List<int> { wineId } });
-                                minPrice = maxPrice-2;
+                                var searchModel = new FilterModel { price_range_min = minPrice, price_range_max = maxPrice - 2, min_rating = rating, wine_type_ids = new List<int> { wineId } };
+                                content = RequestData(searchModel);
+                                minPrice = maxPrice - 2;
+                                p -= 2;
                                 if (!string.IsNullOrEmpty(content))
                                 {
                                     data = JsonConvert.DeserializeObject<Root>(content);
                                     Console.WriteLine("Event Reached " + data.explore_vintage.records_matched);
+                                    int pages = (data.explore_vintage.records_matched + 25 - 1) / 25;
+
+                                    List<int> list = new List<int>();
+                                    for (int i = 1; i <= pages; i++)
+                                    {
+                                        list.Add(i);
+                                    }
+                                    int num1 = (list.Count + 5 - 1) / 5;
+                                    List<Task> taskList = new List<Task>();
+                                    for (int index = 1; index <= num1; ++index)
+                                    {
+                                        int num2 = index - 1;
+                                        var dataPages = list.Skip(num2 * 5).Take(5).ToList();
+                                        Task task1 = Task.Factory.StartNew((Action)(() => GetPagesData(dataPages, searchModel)));
+                                        taskList.Add(task1);
+                                        if (index % 30 == 0 || index == num1)
+                                        {
+                                            foreach (Task task2 in taskList)
+                                            {
+                                                while (!task2.IsCompleted)
+                                                { }
+                                            }
+                                        }
+                                    }
                                 }
 
                             }
                         }
-                    }
 
-                }
-            }
-            List<int> list = new List<int>();
-            for (int i = 1; i <= 991; i++)
-            {
-                if (!File.Exists($"Data/Page{i}.json"))
-                    list.Add(i);
-            }
-            int num1 = (list.Count + 5 - 1) / 5;
-            List<Task> taskList = new List<Task>();
-            for (int index = 1; index <= num1; ++index)
-            {
-                int num2 = index - 1;
-                var data = list.Skip(num2 * 5).Take(5).ToList();
-                Task task1 = Task.Factory.StartNew((Action)(() => GetPagesData(data)));
-                taskList.Add(task1);
-                if (index % 30 == 0 || index == num1)
-                {
-                    foreach (Task task2 in taskList)
-                    {
-                        while (!task2.IsCompleted)
-                        { }
+                        maxPrice = p;
+                        var search = new FilterModel { price_range_min = minPrice, price_range_max = maxPrice, min_rating = rating, wine_type_ids = new List<int> { wineId } };
+                        content = RequestData(search);
+                        if (!string.IsNullOrEmpty(content))
+                        {
+                            var data = JsonConvert.DeserializeObject<Root>(content);
+                            Console.WriteLine("Event Reached " + data.explore_vintage.records_matched);
+                            int pages = (data.explore_vintage.records_matched + 25 - 1) / 25;
+
+                            List<int> list = new List<int>();
+                            for (int i = 1; i <= pages; i++)
+                            {
+                                list.Add(i);
+                            }
+                            int num1 = (list.Count + 5 - 1) / 5;
+                            List<Task> taskList = new List<Task>();
+                            for (int index = 1; index <= num1; ++index)
+                            {
+                                int num2 = index - 1;
+                                var dataPages = list.Skip(num2 * 5).Take(5).ToList();
+                                Task task1 = Task.Factory.StartNew((Action)(() => GetPagesData(dataPages, search)));
+                                taskList.Add(task1);
+                                if (index % 30 == 0 || index == num1)
+                                {
+                                    foreach (Task task2 in taskList)
+                                    {
+                                        while (!task2.IsCompleted)
+                                        { }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
+
+                 ExportData();
             }
+
         }
 
-        private static void GetPagesData(List<int> pages)
+        private static void GetPagesData(List<int> pages, FilterModel model)
         {
-
             foreach (var page in pages)
             {
-                RequestData(new FilterModel { });
+                model.page = page;
+                var content = RequestData(model);
+                if (!string.IsNullOrEmpty(content))
+                {
+                    ExtractData(content);
+                    Console.WriteLine("Processing Page: " + page);
+                }
             }
         }
 
