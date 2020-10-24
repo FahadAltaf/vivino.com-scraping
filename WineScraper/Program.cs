@@ -461,6 +461,14 @@ namespace WineScraper
 
             foreach (var wineId in wineIds)
             {
+                vintage_top_list_rankings = new List<Vintage_TopListRanking>();
+                entries = new List<DataModel>();
+                vintage_wine_region_country_most_used_grapes = new List<Vintage_Wine_Region_Country_MostUsedGrape>();
+                vintage_wine_style_country_most_used_grapes = new List<Vintage_Wine_Style_Country_MostUsedGrape>();
+                vintage_wine_taste_flavor = new List<Vintage_Wine_Taste_Flavor>();
+                vintage_wine_style_food = new List<Vintage_Wine_Style_Food>();
+                vintage_wine_style_grapes = new List<Vintage_Wine_Style_Grapes>();
+
                 //Possible rating filter
                 for (int rating = 1; rating <= 5; rating++)
                 {
@@ -552,9 +560,42 @@ namespace WineScraper
                             }
                         }
                     }
+
+                    var searchModel1 = new FilterModel { price_range_min = minPrice, price_range_max = maxPrice , min_rating = rating, wine_type_ids = new List<int> { wineId } };
+                    var content1 = RequestData(searchModel1);
+                   
+                    if (!string.IsNullOrEmpty(content1))
+                    {
+                      var  data = JsonConvert.DeserializeObject<Root>(content1);
+                        Console.WriteLine("Event Reached " + data.explore_vintage.records_matched);
+                        int pages = (data.explore_vintage.records_matched + 25 - 1) / 25;
+
+                        List<int> list = new List<int>();
+                        for (int i = 1; i <= pages; i++)
+                        {
+                            list.Add(i);
+                        }
+                        int num1 = (list.Count + 5 - 1) / 5;
+                        List<Task> taskList = new List<Task>();
+                        for (int index = 1; index <= num1; ++index)
+                        {
+                            int num2 = index - 1;
+                            var dataPages = list.Skip(num2 * 5).Take(5).ToList();
+                            Task task1 = Task.Factory.StartNew((Action)(() => GetPagesData(dataPages, searchModel1)));
+                            taskList.Add(task1);
+                            if (index % 30 == 0 || index == num1)
+                            {
+                                foreach (Task task2 in taskList)
+                                {
+                                    while (!task2.IsCompleted)
+                                    { }
+                                }
+                            }
+                        }
+                    }
                 }
 
-                 ExportData();
+                ExportData();
             }
 
         }
