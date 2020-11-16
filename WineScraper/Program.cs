@@ -461,16 +461,16 @@ namespace WineScraper
 
             foreach (var wineId in wineIds)
             {
-                vintage_top_list_rankings = new List<Vintage_TopListRanking>();
-                entries = new List<DataModel>();
-                vintage_wine_region_country_most_used_grapes = new List<Vintage_Wine_Region_Country_MostUsedGrape>();
-                vintage_wine_style_country_most_used_grapes = new List<Vintage_Wine_Style_Country_MostUsedGrape>();
-                vintage_wine_taste_flavor = new List<Vintage_Wine_Taste_Flavor>();
-                vintage_wine_style_food = new List<Vintage_Wine_Style_Food>();
-                vintage_wine_style_grapes = new List<Vintage_Wine_Style_Grapes>();
+                //vintage_top_list_rankings = new List<Vintage_TopListRanking>();
+                //entries = new List<DataModel>();
+                //vintage_wine_region_country_most_used_grapes = new List<Vintage_Wine_Region_Country_MostUsedGrape>();
+                //vintage_wine_style_country_most_used_grapes = new List<Vintage_Wine_Style_Country_MostUsedGrape>();
+                //vintage_wine_taste_flavor = new List<Vintage_Wine_Taste_Flavor>();
+                //vintage_wine_style_food = new List<Vintage_Wine_Style_Food>();
+                //vintage_wine_style_grapes = new List<Vintage_Wine_Style_Grapes>();
 
                 //Possible rating filter
-                for (int rating = 1; rating <= 5; rating++)
+                for (int rating = 5; rating >= 1; rating--)
                 {
                     int minPrice = 0; int maxPrice = 0;
                     //max and min price filter
@@ -595,9 +595,9 @@ namespace WineScraper
                     }
                 }
 
-                ExportData();
+                
             }
-
+            ExportData();
         }
 
         private static void GetPagesData(List<int> pages, FilterModel model)
