@@ -14,106 +14,9 @@ using WineScraper.Models;
 
 namespace WineScraper
 {
-    public class FilterModel
-    {
-        public string country_code { get; set; } = "US";
-        public string currency_code { get; set; } = "USD";
-        public string grape_filter { get; set; } = "varietal";
-        public int min_rating { get; set; } = 1;
-        public int page { get; set; } = 1;
-        public int price_range_max { get; set; } = 500;
-        public int price_range_min { get; set; } = 0;
-        public List<int> wine_type_ids { get; set; } = new List<int>() { 1 };
-    }
-    public class DataModel
-    {
-        public string vintage_id { get; set; }
-        public string vintage_seo_name { get; set; }
-        public string vintage_name { get; set; }
-        public string vintage_year { get; set; }
-        public object vintage_grapes { get; set; }
-        public bool vintage_has_valid_ratings { get; set; }
-
-        public string vintage_statistics_status { get; set; }
-        public string vintage_statistics_ratings_count { get; set; }
-        public string vintage_statistics_ratings_average { get; set; }
-        public string vintage_statistics_labels_count { get; set; }
-        public string vintage_image_location { get; set; }
-        public string vintage_image_variations_bottle_large { get; set; }
-        public string vintage_image_variations_label_large { get; set; }
-
-        public string vintage_wine_id { get; set; }
-        public string vintage_wine_name { get; set; }
-        public string vintage_wine_seo_name { get; set; }
-        public bool vintage_wine_has_valid_ratings { get; set; }
-
-        public string vintage_wine_region_id { get; set; }
-        public string vintage_wine_region_name { get; set; }
-        public string vintage_wine_region_seo_name { get; set; }
-        public Country vintage_wine_region_country { get; set; }
-
-        public string vintage_wine_region_country_name { get; set; }
-        public string vintage_wine_region_country_seo_name { get; set; }
-        public string vintage_wine_region_country_regions_count { get; set; }
-        public string vintage_wine_region_country_users_count { get; set; }
-        public string vintage_wine_region_country_wineries_count { get; set; }
-        public List<Vintage_Wine_Style_Country_MostUsedGrape> vintage_wine_region_country_most_used_grapes { get; set; }
-
-
-        public string vintage_wine_taste_structure_acidity { get; set; }
-        public string vintage_wine_taste_structure_fizziness { get; set; }
-        public string vintage_wine_taste_structure_intensity { get; set; }
-        public string vintage_wine_taste_structure_sweetness { get; set; }
-        public string vintage_wine_taste_structure_tannin { get; set; }
-        public string vintage_wine_taste_structure_user_structure_count { get; set; }
-        public string vintage_wine_taste_structure_calculated_structure_count { get; set; }
-        public List<Vintage_Wine_Taste_Flavor> vintage_wine_taste_flavor { get; set; } = new List<Vintage_Wine_Taste_Flavor>();
-        public string vintage_wine_statistics_status { get; set; }
-        public string vintage_wine_statistics_ratings_count { get; set; }
-        public string vintage_wine_statistics_ratings_average { get; set; }
-        public string vintage_wine_statistics_labels_count { get; set; }
-        public string vintage_wine_statistics_vintages_count { get; set; }
-
-
-        public string vintage_wine_style_id { get; set; }
-        public string vintage_wine_style_seo_name { get; set; }
-        public string vintage_wine_style_regional_name { get; set; }
-        public string vintage_wine_style_varietal_name { get; set; }
-        public string vintage_wine_style_description { get; set; }
-        public string vintage_wine_style_blurb { get; set; }
-        public string vintage_wine_styleinteresting_facts { get; set; }
-        public string vintage_wine_style_body { get; set; }
-        public string vintage_wine_style_body_description { get; set; }
-        public string vintage_wine_style_acidity { get; set; }
-        public string vintage_wine_style_acidity_description { get; set; }
-
-        public List<Vintage_Wine_Style_Food> vintage_wine_style_food { get; set; } = new List<Vintage_Wine_Style_Food>();
-        public List<Vintage_Wine_Style_Grapes> vintage_wine_style_grapes { get; set; } = new List<Vintage_Wine_Style_Grapes>();
-
-        public string vintage_wine_style_country_name { get; set; }
-        public string vintage_wine_style_country_seo_name { get; set; }
-        public string vintage_wine_style_country_regions_count { get; set; }
-        public string vintage_wine_style_country_users_count { get; set; }
-        public string vintage_wine_style_country_wines_count { get; set; }
-        public string vintage_wine_style_country_wineries_count { get; set; }
-        public List<Vintage_Wine_Style_Country_MostUsedGrape> vintage_wine_style_country_most_used_grapes { get; set; } = new List<Vintage_Wine_Style_Country_MostUsedGrape>();
-
-
-
-
-
-        public string price_id { get; set; }
-        public string price_amount { get; set; }
-        public string price_discounted_from { get; set; }
-        public string price_sku { get; set; }
-        public string price_url { get; set; }
-        public string price_currency_code { get; set; }
-        public string price_bottle_type_id { get; set; }
-        public string price_bottle_type_name { get; set; }
-        public string price_bottle_type_volume_ml { get; set; }
-    }
     class Program
     {
+        static Settings settings = new Settings();
         static List<Vintage_TopListRanking> vintage_top_list_rankings = new List<Vintage_TopListRanking>();
         static List<DataModel> entries = new List<DataModel>();
         public static List<Vintage_Wine_Region_Country_MostUsedGrape> vintage_wine_region_country_most_used_grapes = new List<Vintage_Wine_Region_Country_MostUsedGrape>();
@@ -123,12 +26,23 @@ namespace WineScraper
         public static List<Vintage_Wine_Style_Grapes> vintage_wine_style_grapes = new List<Vintage_Wine_Style_Grapes>();
         static void Main(string[] args)
         {
-            GetJsonFiles();
-            Console.WriteLine("operation completed");
+            try
+            {
+                //Load Settings
+                var settingsJson = File.ReadAllText("settings.json");
+                settings = JsonConvert.DeserializeObject<Settings>(settingsJson);
+                Console.WriteLine("Settings Loaded...");
 
+                ScrapeData();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"We are unable to continue due to \"{ex.Message}\"");
+            }
+            
+            Console.WriteLine("Press any key to continue...");
             Console.ReadKey();
         }
-
         public void ExtractData()
         {
             foreach (var file in Directory.GetFiles(@"C:\Users\kernal\source\repos\WineScraper\WineScraper\bin\Debug\Data", "*.json"))
@@ -454,10 +368,10 @@ namespace WineScraper
 
             }
         }
-        public static void GetJsonFiles()
+        public static void ScrapeData()
         {
             //Possible wine Ids
-            List<int> wineIds = new List<int> { 1, 2, 3, 4, 7, 24 };
+            List<int> wineIds = settings.WineTypes.Select(x => x.Id).ToList();
 
 
             foreach (var wineId in wineIds)
@@ -474,7 +388,6 @@ namespace WineScraper
                         if (!string.IsNullOrEmpty(content))
                         {
                             //got result let parse it and check how many total records are there
-
                             var data = JsonConvert.DeserializeObject<Root>(content);
                             if (data.explore_vintage.records_matched < 2025)
                             {
@@ -522,7 +435,6 @@ namespace WineScraper
                 }
             }
         }
-
         private static void GetPagesData(List<int> pages)
         {
 
@@ -531,13 +443,12 @@ namespace WineScraper
                 RequestData(new FilterModel { });
             }
         }
-
         private static string RequestData(FilterModel model)
         {
             string content = string.Empty;
 
             var client = new RestClient("https://www.vivino.com/");
-            //client.Proxy = new WebProxy("127.0.0.1", 2400);
+            client.Proxy = new WebProxy("127.0.0.1", 2400);
             string url = $"api/explore/explore?country_code={model.country_code}&currency_code={model.currency_code}&grape_filter=varietal&min_rating={model.min_rating}&order_by=ratings_average&order=desc&page={model.page}&price_range_max={model.price_range_max}&price_range_min={model.price_range_min}&vc_only=null";
             foreach (var wine in model.wine_type_ids)
             {
@@ -546,7 +457,7 @@ namespace WineScraper
             var request = new RestRequest(url, Method.GET);
             var queryResult = client.Execute(request);
             content = (queryResult.StatusCode == System.Net.HttpStatusCode.OK) ? queryResult.Content : "";
-            if (string.IsNullOrEmpty(content))
+            lif (string.IsNullOrEmpty(content))
                 Console.WriteLine($"Error: Unable to load {url}");
             return content;
         }
