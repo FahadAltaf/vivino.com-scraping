@@ -1,35 +1,19 @@
 {
-  "WineType": [
-    {
-      "Id": 1,
-      "Title": "Red"
-    },
-    {
-      "Id": 2,
-      "Title": "White"
-    },
-    {
-      "Id": 3,
-      "Title": "Sparkling"
-    },
-    {
-      "Id": 4,
-      "Title": "Rose"
-    },
-    {
-      "Id": 7,
-      "Title": "Dessert"
-    },
+  "WineTypes": [
     {
       "Id": 24,
       "Title": "Fortified"
     }
   ],
   "PriceRange": {
-    "Min": 1,
-    "Max": 5
+    "Min": 0,
+    "Max": 500
   },
-  "MinRating": 1,
-  "Proxy": "",
-  "SaveFilesTo": ""
+  "PriceJump": 10,
+  "Rating": [4.5,4.0,3.5,3.0,1],
+  "Proxy": {
+    "Ip": "",
+    "Port": 0
+  },
+  "SaveFilesTo": "C:\\Users\\Super\\Documents\\Scrapers"
 }

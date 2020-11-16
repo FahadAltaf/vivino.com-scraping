@@ -48,6 +48,7 @@ namespace WineScraper.Models
     public class Market
     {
         public string country { get; set; }
+        public string state { get; set; }
         public Currency currency { get; set; }
     }
 
@@ -1035,13 +1036,20 @@ namespace WineScraper.Models
     public class Settings
     {
         public List<WineType> WineTypes { get; set; } = new List<WineType>();
-        public int MinRating { get; set; }
-        public PriceRange PriceRange { get; set; }
-        public string Proxy { get; set; }
+        public List<float> Rating { get; set; } = new List<float>();
+        public Range PriceRange { get; set; }
+        public int PriceJump { get; set; }
+        public Proxy Proxy { get; set; }
         public string SaveFilesTo { get; set; }
     }
 
-    public class PriceRange
+    public class Proxy
+    {
+        public string Ip { get; set; }
+        public int Port { get; set; }
+    }
+
+    public class Range
     {
         public int Min { get; set; }
         public int Max { get; set; }
@@ -1052,7 +1060,7 @@ namespace WineScraper.Models
         public string country_code { get; set; } = "US";
         public string currency_code { get; set; } = "USD";
         public string grape_filter { get; set; } = "varietal";
-        public int min_rating { get; set; } = 1;
+        public float min_rating { get; set; } = 1;
         public int page { get; set; } = 1;
         public int price_range_max { get; set; } = 500;
         public int price_range_min { get; set; } = 0;
@@ -1083,8 +1091,6 @@ namespace WineScraper.Models
         public string vintage_wine_region_id { get; set; }
         public string vintage_wine_region_name { get; set; }
         public string vintage_wine_region_seo_name { get; set; }
-        public Country vintage_wine_region_country { get; set; }
-
         public string vintage_wine_region_country_name { get; set; }
         public string vintage_wine_region_country_seo_name { get; set; }
         public string vintage_wine_region_country_regions_count { get; set; }
