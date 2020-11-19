@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -1045,8 +1046,8 @@ namespace WineScraper.Models
 
     public class Proxy
     {
-        public string Ip { get; set; }
-        public int Port { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
     }
 
     public class Range
@@ -1150,6 +1151,114 @@ namespace WineScraper.Models
         public string price_bottle_type_id { get; set; }
         public string price_bottle_type_name { get; set; }
         public string price_bottle_type_volume_ml { get; set; }
+    }
+
+    public class ProxyModel
+    {
+        [JsonProperty("proxy")]
+        public string Proxy { get; set; }
+
+        [JsonProperty("ip")]
+        public string Ip { get; set; }
+
+        [JsonProperty("port")]
+        public int Port { get; set; }
+
+        [JsonProperty("connectionType")]
+        public string ConnectionType { get; set; }
+
+        [JsonProperty("asn")]
+        public long Asn { get; set; }
+
+        [JsonProperty("isp")]
+        public string Isp { get; set; }
+
+        [JsonProperty("type")]
+        public string Type { get; set; }
+
+        [JsonProperty("lastChecked")]
+        public long LastChecked { get; set; }
+
+        [JsonProperty("get")]
+        public bool Get { get; set; }
+
+        [JsonProperty("post")]
+        public bool Post { get; set; }
+
+        [JsonProperty("cookies")]
+        public bool Cookies { get; set; }
+
+        [JsonProperty("referer")]
+        public bool Referer { get; set; }
+
+        [JsonProperty("userAgent")]
+        public bool UserAgent { get; set; }
+
+        [JsonProperty("city")]
+        public string City { get; set; }
+
+        [JsonProperty("state")]
+        public string State { get; set; }
+
+        [JsonProperty("country")]
+        public string Country { get; set; }
+
+        [JsonProperty("randomUserAgent")]
+        public string RandomUserAgent { get; set; }
+
+        [JsonProperty("requestsRemaining")]
+        public long RequestsRemaining { get; set; }
+    }
+
+    public partial class Temperatures
+    {
+        [JsonProperty("count")]
+        public long Count { get; set; }
+
+        [JsonProperty("next")]
+        public Uri Next { get; set; }
+
+        [JsonProperty("previous")]
+        public object Previous { get; set; }
+
+        [JsonProperty("results")]
+        public Result[] Results { get; set; }
+    }
+
+    public partial class Result
+    {
+        [JsonProperty("username")]
+        public string Username { get; set; }
+
+        [JsonProperty("password")]
+        public string Password { get; set; }
+
+        [JsonProperty("proxy_address")]
+        public string ProxyAddress { get; set; }
+
+        [JsonProperty("ports")]
+        public Ports Ports { get; set; }
+
+        [JsonProperty("valid")]
+        public bool Valid { get; set; }
+
+        [JsonProperty("last_verification")]
+        public DateTimeOffset LastVerification { get; set; }
+
+        [JsonProperty("country_code")]
+        public string CountryCode { get; set; }
+
+        [JsonProperty("country_code_confidence")]
+        public double CountryCodeConfidence { get; set; }
+    }
+
+    public partial class Ports
+    {
+        [JsonProperty("http")]
+        public long Http { get; set; }
+
+        [JsonProperty("socks5")]
+        public long Socks5 { get; set; }
     }
 
 }

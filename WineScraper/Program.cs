@@ -26,10 +26,23 @@ namespace WineScraper
         public static List<Vintage_Wine_Style_Grapes> vintage_wine_style_grapes = new List<Vintage_Wine_Style_Grapes>();
         static string Session = "";
         static string ScrapingRegion = "";
+        public static DataStates SelectedRegion { get; set; }
         static void Main(string[] args)
         {
             try
             {
+                if (NordManager.NordServers.Count == 0)
+                    NordManager.FetchServers(); //load servers else pick from cashed servers
+                Console.WriteLine("Please select region");
+                foreach (var server in NordManager.NordServers.Where(x => x.Servers.Count > 0))
+                {
+                    Console.WriteLine($"{NordManager.NordServers.IndexOf(server)} - {server.Name}({server.Servers.Count})");
+                }
+                Console.WriteLine("Select Region: ");
+                var index = Convert.ToInt32(Console.ReadLine());
+                SelectedRegion = NordManager.NordServers[index];
+                Console.Clear();
+                Console.WriteLine("You have selected: " + SelectedRegion.Name);
                 var today = DateTime.Now;
                 Session = $"{today.Year}{today.Month}{today.Day}{today.Hour}{today.Minute}{today.Second}";
                 //Load Settings
@@ -456,15 +469,33 @@ namespace WineScraper
             string content = string.Empty;
 
             var client = new RestClient("https://www.vivino.com/");
-            if (!string.IsNullOrEmpty(settings.Proxy.Ip) && settings.Proxy.Port > 0)
-                client.Proxy = new WebProxy(settings.Proxy.Ip, settings.Proxy.Port);
+
+
             string url = $"api/explore/explore?country_code={model.country_code}&currency_code={model.currency_code}&grape_filter=varietal&min_rating={model.min_rating}&order_by=ratings_average&order=desc&page={model.page}&price_range_max={model.price_range_max}&price_range_min={model.price_range_min}";
             foreach (var wine in model.wine_type_ids)
             {
                 url += $"&wine_type_ids[]={wine}";
             }
             var request = new RestRequest(url, Method.GET);
-            var queryResult = client.Execute(request);
+            IRestResponse queryResult;
+            //do we have to use proxy
+            if (!string.IsNullOrEmpty(settings.Proxy.Username) && !string.IsNullOrEmpty(settings.Proxy.Password))
+            {
+                var index = new Random().Next(0, SelectedRegion.Servers.Count);
+                var proxy = new WebProxy
+                {
+                    Address = new Uri($"http://{SelectedRegion.Servers[index].hostname}:{80}"),
+                    BypassProxyOnLocal = false,
+                    UseDefaultCredentials = false,
+
+                    // *** These creds are given to the proxy server, not the web server ***
+                    Credentials = new NetworkCredential(
+              userName: settings.Proxy.Username,
+              password: settings.Proxy.Password)
+                };
+                client.Proxy = proxy;
+            }
+            queryResult = client.Execute(request);
             content = (queryResult.StatusCode == System.Net.HttpStatusCode.OK) ? queryResult.Content : "";
             if (string.IsNullOrEmpty(content))
                 Console.WriteLine($"Error: Unable to load {url}");
@@ -478,7 +509,6 @@ namespace WineScraper
             }
             else
                 Console.WriteLine("Server didn't returned any data");
-
             return null;
         }
     }
