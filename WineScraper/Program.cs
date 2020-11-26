@@ -1,4 +1,5 @@
 ﻿using CsvHelper;
+using FahadKernal.NordVPN.ServerSwitcher;
 using Newtonsoft.Json;
 using RestSharp;
 using System;
@@ -26,21 +27,23 @@ namespace WineScraper
         public static List<Vintage_Wine_Style_Grapes> vintage_wine_style_grapes = new List<Vintage_Wine_Style_Grapes>();
         static string Session = "";
         static string ScrapingRegion = "";
-        public static DataStates SelectedRegion { get; set; }
+        static string RegionTitle = "";
+        public static ServersBy SelectedRegion { get; set; }
+        static int Counter = -1;
         static void Main(string[] args)
         {
             try
             {
-                if (NordManager.NordServers.Count == 0)
-                    NordManager.FetchServers(); //load servers else pick from cashed servers
+
+                var servers = NordManager.ServersByUSCities();
                 Console.WriteLine("Please select region");
-                foreach (var server in NordManager.NordServers.Where(x => x.Servers.Count > 0))
+                foreach (var server in servers.Where(x => x.Servers.Count > 0))
                 {
-                    Console.WriteLine($"{NordManager.NordServers.IndexOf(server)} - {server.Name}({server.Servers.Count})");
+                    Console.WriteLine($"{servers.IndexOf(server)} - {server.Name}({server.Servers.Count})");
                 }
                 Console.WriteLine("Select Region: ");
                 var index = Convert.ToInt32(Console.ReadLine());
-                SelectedRegion = NordManager.NordServers[index];
+                SelectedRegion = servers[index];
                 Console.Clear();
                 Console.WriteLine("You have selected: " + SelectedRegion.Name);
                 var today = DateTime.Now;
@@ -107,7 +110,12 @@ namespace WineScraper
                             entry.vintage_wine_name = record.vintage.wine.name;
                             entry.vintage_wine_seo_name = record.vintage.wine.seo_name;
                             entry.vintage_wine_has_valid_ratings = record.vintage.has_valid_ratings;
-
+                            if (record.vintage.wine.winery != null)
+                            {
+                                entry.vintage_wine_winery_id = record.vintage.wine.winery.id;
+                                entry.vintage_wine_winery_name = record.vintage.wine.winery.name;
+                                entry.vintage_wine_winery_seo_name = record.vintage.wine.winery.seo_name;
+                            }
                             if (record.vintage.wine.region != null)
                             {
                                 entry.vintage_wine_region_id = record.vintage.wine.region.id;
@@ -115,6 +123,12 @@ namespace WineScraper
                                 entry.vintage_wine_region_seo_name = record.vintage.wine.region.seo_name;
                                 if (record.vintage.wine.region.country != null)
                                 {
+                                    entry.vintage_wine_region_country_code = record.vintage.wine.region.country.code;
+                                    entry.vintage_wine_region_country_native_name = record.vintage.wine.region.country.native_name;
+                                    entry.vintage_wine_region_country_currency_code = record.vintage.wine.region.country.currency.code;
+                                    entry.vintage_wine_region_country_currency_name = record.vintage.wine.region.country.currency.name;
+                                    entry.vintage_wine_region_country_currency_prefix = record.vintage.wine.region.country.currency.prefix;
+
                                     entry.vintage_wine_region_country_name = record.vintage.wine.region.country.name;
                                     entry.vintage_wine_region_country_seo_name = record.vintage.wine.region.country.seo_name;
                                     entry.vintage_wine_region_country_regions_count = record.vintage.wine.region.country.regions_count;
@@ -196,6 +210,36 @@ namespace WineScraper
                                     entry.vintage_wine_styleinteresting_facts = string.Join(";", record.vintage.wine.style.interesting_facts);
                                 }
 
+                                if (record.vintage.wine.style.region != null)
+                                {
+
+                                    entry.vintage_wine_style_region_id = record.vintage.wine.style.region.id;
+                                    entry.vintage_wine_style_region_name_en = record.vintage.wine.style.region.name_en;
+                                    entry.vintage_wine_style_region_seo_name = record.vintage.wine.style.region.seo_name;
+                                    if (record.vintage.wine.style.region.country != null)
+                                    {
+                                        entry.vintage_wine_style_region_country_code = record.vintage.wine.style.region.country.code;
+                                        entry.vintage_wine_style_region_country_name = record.vintage.wine.style.region.country.name;
+                                        entry.vintage_wine_style_region_country_native_name = record.vintage.wine.style.region.country.native_name;
+                                        entry.vintage_wine_style_region_country_seo_name = record.vintage.wine.style.region.country.seo_name;
+                                        if (record.vintage.wine.style.region.country.currency != null)
+                                        {
+                                            entry.vintage_wine_style_region_country_currency_code = record.vintage.wine.style.region.country.currency.code;
+                                            entry.vintage_wine_style_region_country_currency_name = record.vintage.wine.style.region.country.currency.name;
+                                            entry.vintage_wine_style_region_country_currency_prefix = record.vintage.wine.style.region.country.currency.prefix;
+                                        }
+
+                                        entry.vintage_wine_style_region_country_regions_count = record.vintage.wine.style.region.country.regions_count;
+                                        entry.vintage_wine_style_region_country_users_count = record.vintage.wine.style.region.country.users_count;
+                                        entry.vintage_wine_style_region_country_wines_count = record.vintage.wine.style.region.country.wines_count;
+                                        entry.vintage_wine_style_region_country_wineries_count = record.vintage.wine.style.region.country.wineries_count;
+                                    }
+
+                                }
+
+
+
+
                                 entry.vintage_wine_style_body = record.vintage.wine.style.body;
                                 entry.vintage_wine_style_body_description = record.vintage.wine.style.description;
                                 entry.vintage_wine_style_acidity = record.vintage.wine.style.acidity;
@@ -238,6 +282,9 @@ namespace WineScraper
 
                                 if (record.vintage.wine.style.country != null)
                                 {
+
+                                    entry.vintage_wine_style_country_code = record.vintage.wine.style.country.code;
+                                    entry.vintage_wine_style_country_native_name = record.vintage.wine.style.country.native_name;
                                     entry.vintage_wine_style_country_name = record.vintage.wine.style.country.name;
                                     entry.vintage_wine_style_country_seo_name = record.vintage.wine.style.country.seo_name;
                                     entry.vintage_wine_style_country_regions_count = record.vintage.wine.style.country.regions_count;
@@ -315,7 +362,7 @@ namespace WineScraper
         }
         private static void ExportData()
         {
-            var path = settings.SaveFilesTo + $"\\{Session}-{ScrapingRegion}";
+            var path = settings.SaveFilesTo + $"\\{Session}-{RegionTitle}";
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
 
@@ -390,12 +437,12 @@ namespace WineScraper
                         //got result let parse it and check how many total records are there
                         if (data1.explore_vintage.records_matched < 2025)
                         {
-                            Console.WriteLine($"Price Range: [ min:{minPrice}, max:{maxPrice} ]. Results: " + data1.explore_vintage.records_matched);
+                            Console.WriteLine($"State:{data1.explore_vintage.market.state} ==> Price Range: [ min:{minPrice}, max:{maxPrice} ]. Results: " + data1.explore_vintage.records_matched);
                             if (maxPrice == 500)
                             {
                                 var search1 = new FilterModel { price_range_min = minPrice, price_range_max = maxPrice, min_rating = rating, wine_type_ids = new List<int> { wine.Id } };
                                 var data2 = RequestData(search1);
-                                Console.WriteLine("Max mimit reached:  " + data2.explore_vintage.records_matched);
+                                Console.WriteLine("Max limit reached:  " + data2.explore_vintage.records_matched);
                                 ExtractData(data2, search1);
                                 ExportData();
                             }
@@ -406,10 +453,10 @@ namespace WineScraper
                         {
                             var searchModel = new FilterModel { price_range_min = minPrice, price_range_max = maxPrice - 2, min_rating = rating, wine_type_ids = new List<int> { wine.Id } };
                             data1 = RequestData(searchModel);
-                            minPrice = maxPrice - 2;
-                            p -= 2;
+                            minPrice = maxPrice - settings.PriceJump;
+                            p -= settings.PriceJump;
 
-                            Console.WriteLine("Max mimit reached:  " + data1.explore_vintage.records_matched);
+                            Console.WriteLine("Max limit reached:  " + data1.explore_vintage.records_matched);
                             ExtractData(data1, searchModel);
                             ExportData();
 
@@ -459,56 +506,63 @@ namespace WineScraper
             foreach (var page in pages)
             {
                 model.page = page;
-                MapData(RequestData(model));
+                MapData(RequestData(model, false));
                 Console.WriteLine("Processing Page: " + page);
 
             }
         }
-        private static Root RequestData(FilterModel model)
+        private static Root RequestData(FilterModel model, bool switchServer = true)
         {
-            string content = string.Empty;
-
-            var client = new RestClient("https://www.vivino.com/");
-
-
-            string url = $"api/explore/explore?country_code={model.country_code}&currency_code={model.currency_code}&grape_filter=varietal&min_rating={model.min_rating}&order_by=ratings_average&order=desc&page={model.page}&price_range_max={model.price_range_max}&price_range_min={model.price_range_min}";
-            foreach (var wine in model.wine_type_ids)
+            try
             {
-                url += $"&wine_type_ids[]={wine}";
-            }
-            var request = new RestRequest(url, Method.GET);
-            IRestResponse queryResult;
-            //do we have to use proxy
-            if (!string.IsNullOrEmpty(settings.Proxy.Username) && !string.IsNullOrEmpty(settings.Proxy.Password))
-            {
-                var index = new Random().Next(0, SelectedRegion.Servers.Count);
-                var proxy = new WebProxy
+            tryagain:
+                if (switchServer)
                 {
-                    Address = new Uri($"http://{SelectedRegion.Servers[index].hostname}:{80}"),
-                    BypassProxyOnLocal = false,
-                    UseDefaultCredentials = false,
+                    if (Counter == -1 || Counter > settings.ServerSwitch)
+                    {
+                        var hostNames = SelectedRegion.Servers.Select(x => x.name).ToList();
+                        if (!string.IsNullOrEmpty(ScrapingRegion))
+                            hostNames.Remove(ScrapingRegion);
+                        ScrapingRegion = NordManager.RotateNord(hostNames, SelectedRegion.Servers);
+                        Counter = 0;
+                    }
+                    else
+                        Counter += 1;
+                }
+                string content = string.Empty;
 
-                    // *** These creds are given to the proxy server, not the web server ***
-                    Credentials = new NetworkCredential(
-              userName: settings.Proxy.Username,
-              password: settings.Proxy.Password)
-                };
-                client.Proxy = proxy;
+                var client = new RestClient("https://www.vivino.com/");
+                string url = $"api/explore/explore?country_code={model.country_code}&currency_code={model.currency_code}&grape_filter=varietal&min_rating={model.min_rating}&order_by=ratings_average&order=desc&page={model.page}&price_range_max={model.price_range_max}&price_range_min={model.price_range_min}";
+                foreach (var wine in model.wine_type_ids)
+                {
+                    url += $"&wine_type_ids[]={wine}";
+                }
+                var request = new RestRequest(url, Method.GET);
+                IRestResponse queryResult = client.Execute(request);
+                if (queryResult == null)
+                {
+                    Counter = settings.ServerSwitch + 1;
+                    switchServer = true;
+                    goto tryagain;
+                }
+                content = (queryResult.StatusCode == System.Net.HttpStatusCode.OK) ? queryResult.Content : "";
+                if (string.IsNullOrEmpty(content))
+                    Console.WriteLine($"Error: Unable to load {url}");
+
+                if (!string.IsNullOrEmpty(content))
+                {
+                    //got result let parse it and check how many total records are there
+                    var result = JsonConvert.DeserializeObject<Root>(content);
+                    RegionTitle = result.explore_vintage.market.state;
+                    return result;
+                }
+                else
+                    Console.WriteLine("Server didn't returned any data");
             }
-            queryResult = client.Execute(request);
-            content = (queryResult.StatusCode == System.Net.HttpStatusCode.OK) ? queryResult.Content : "";
-            if (string.IsNullOrEmpty(content))
-                Console.WriteLine($"Error: Unable to load {url}");
-
-            if (!string.IsNullOrEmpty(content))
+            catch (Exception ex)
             {
-                //got result let parse it and check how many total records are there
-                var result = JsonConvert.DeserializeObject<Root>(content);
-                ScrapingRegion = result.explore_vintage.market.state;
-                return result;
+                Console.WriteLine($"Something happened: {ex.Message}");
             }
-            else
-                Console.WriteLine("Server didn't returned any data");
             return null;
         }
     }

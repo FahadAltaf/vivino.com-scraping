@@ -29,11 +29,12 @@
     "Min": 0,
     "Max": 500
   },
-  "PriceJump": 10,
+  "PriceJump": 20,
   "Rating": [ 4.5, 4.0, 3.5, 3.0, 1 ],
   "Proxy": {
     "Username": "reNSWmnG9nYuN8Md3Q2P4Y4K",
     "Password": "mNqVL7q71vdPywYWij7B2LHM"
   },
-  "SaveFilesTo": "C:\\Users\\Super\\Documents\\Scrapers"
+  "SaveFilesTo": "C:\\Users\\Super\\Documents\\Scrapers",
+  "ServerSwitch": 300
 }

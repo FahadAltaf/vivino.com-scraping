@@ -1042,6 +1042,7 @@ namespace WineScraper.Models
         public int PriceJump { get; set; }
         public Proxy Proxy { get; set; }
         public string SaveFilesTo { get; set; }
+        public int ServerSwitch { get; set; }
     }
 
     public class Proxy
@@ -1084,6 +1085,10 @@ namespace WineScraper.Models
         public string vintage_image_variations_bottle_large { get; set; }
         public string vintage_image_variations_label_large { get; set; }
 
+        public string vintage_wine_winery_id { get; set; }//new
+        public string vintage_wine_winery_name { get; set; }//new
+        public string vintage_wine_winery_seo_name { get; set; }//new
+
         public string vintage_wine_id { get; set; }
         public string vintage_wine_name { get; set; }
         public string vintage_wine_seo_name { get; set; }
@@ -1093,6 +1098,12 @@ namespace WineScraper.Models
         public string vintage_wine_region_name { get; set; }
         public string vintage_wine_region_seo_name { get; set; }
         public string vintage_wine_region_country_name { get; set; }
+        public string vintage_wine_region_country_code { get; set; }//new
+        public string vintage_wine_region_country_native_name { get; set; }//new
+        public string vintage_wine_region_country_currency_code { get; set; }//new
+        public string vintage_wine_region_country_currency_name { get; set; }//new
+        public string vintage_wine_region_country_currency_prefix { get; set; }//new
+
         public string vintage_wine_region_country_seo_name { get; set; }
         public string vintage_wine_region_country_regions_count { get; set; }
         public string vintage_wine_region_country_users_count { get; set; }
@@ -1126,6 +1137,25 @@ namespace WineScraper.Models
         public string vintage_wine_style_body_description { get; set; }
         public string vintage_wine_style_acidity { get; set; }
         public string vintage_wine_style_acidity_description { get; set; }
+
+        //new
+        public string vintage_wine_style_country_code { get; set; }
+        public string vintage_wine_style_country_native_name { get; set; }
+        public string vintage_wine_style_region_id { get; set; }
+        public string vintage_wine_style_region_name_en { get; set; }
+        public string vintage_wine_style_region_seo_name { get; set; }
+        public string vintage_wine_style_region_country_code { get; set; }
+        public string vintage_wine_style_region_country_name { get; set; }
+        public string vintage_wine_style_region_country_native_name { get; set; }
+        public string vintage_wine_style_region_country_seo_name { get; set; }
+        public string vintage_wine_style_region_country_currency_code { get; set; }
+        public string vintage_wine_style_region_country_currency_name { get; set; }
+        public string vintage_wine_style_region_country_currency_prefix { get; set; }
+        public string vintage_wine_style_region_country_regions_count { get; set; }
+        public string vintage_wine_style_region_country_users_count { get; set; }
+        public string vintage_wine_style_region_country_wines_count { get; set; }
+        public string vintage_wine_style_region_country_wineries_count { get; set; }
+        //new
 
         public List<Vintage_Wine_Style_Food> vintage_wine_style_food { get; set; } = new List<Vintage_Wine_Style_Food>();
         public List<Vintage_Wine_Style_Grapes> vintage_wine_style_grapes { get; set; } = new List<Vintage_Wine_Style_Grapes>();
