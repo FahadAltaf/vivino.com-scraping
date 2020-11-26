@@ -86,8 +86,8 @@ namespace FahadKernal.NordVPN.ServerSwitcher
         public static string RotateNord(List<string> regionServers,List<NordServers> servers)//remove current selected server
         {tryagain:
             //Make sure norvpn is running
-            //if (Process.GetProcessesByName("NordVPN").Length > 0)
-            //{
+            if (Process.GetProcessesByName("NordVPN").Length > 0)
+            {
                 var filtered = servers.Where(x=>x.load<15);
                 if (filtered.Count() > 0)
                 {
@@ -139,9 +139,9 @@ namespace FahadKernal.NordVPN.ServerSwitcher
                     goto tryagain;
                 }
                 return randomServer;
-            //}
-            //else
-            //    throw new Exception("NordVPN is not running");
+            }
+            else
+                throw new Exception("NordVPN is not running");
         }
 
         static void RunCommands(List<string> cmds, string workingDirectory = "")
